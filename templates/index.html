@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Intérprete Bazilio - Sol</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h2>  Interprete de notas musicales  </h2>
+            <p></p>
+        </header>
+
+        <div class="card">
+            <h3> Código.bzl</h3>
+            <p class="subtitle">Escribe tus notas musicales aquí:</p>
+<textarea id="codigoBzl" spellcheck="false">Main |:
+<w> "Melodia de Sol"
+toca C5
+toca E5
+toca G4
+:|</textarea>
+            
+            <div class="button-group">
+                <button onclick="enviarAccion('audio')" class="btn-audio"> Reproducir / Audio</button>
+                <button onclick="enviarAccion('pdf')" class="btn-pdf"> Generar PDF</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3> Consola de Compilación</h3>
+            <pre id="consolaOutput" class="console">Esperando acción...</pre>
+        </div>
+    </div>
+
+    <script>
+        async function enviarAccion(tipoAccion) {
+            const codigo = document.getElementById('codigoBzl').value;
+            const consola = document.getElementById('consolaOutput');
+
+            const mensajeCarga = tipoAccion === 'audio' 
+                ? "Procesando audio y melodía...\n" 
+                : "Generando documento PDF...\n";
+
+            consola.textContent = mensajeCarga;
+            
+            try {
+                const respuesta = await fetch('/compilar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ codigo: codigo, accion: tipoAccion })
+                });
+
+                const resultado = await respuesta.json();
+                consola.textContent = resultado.logs;
+            } catch (error) {
+                consola.textContent = "Error de conexión con Flask: " + error;
+            }
+        }
+    </script>
+
+</body>
+</html>
